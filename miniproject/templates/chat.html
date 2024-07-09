@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #c37ee6;
+            margin: 0;
+            padding: 20px;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .chat-header {
+            background-color: #4e0374;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+            border-bottom: 1px solid #ccc;
+        }
+        .chat-body {
+            padding: 20px;
+            overflow-y: scroll;
+            max-height: 400px;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #8208bf;
+            color: #fff;
+            text-align: right;
+        }
+        .bot-message {
+            background-color: #f0f0f0;
+            color: #333;
+            text-align: left;
+        }
+        .message p {
+            margin: 5px 0;
+        }
+        .message .role {
+            font-weight: bold;
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 3px;
+        }
+        .chat-input {
+            display: flex;
+            margin-top: 20px;
+        }
+        .chat-input input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .chat-input button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            background-color:  #4e0374;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .chat-input button:hover {
+            background-color: #8208bf;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            Chatbot
+        </div>
+        <div class="chat-body" id="chat-body">
+            <!-- Chat messages will be displayed here -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatBody = document.getElementById('chat-body');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+
+            sendBtn.addEventListener('click', function() {
+                const userMessage = userInput.value.trim();
+                if (userMessage !== '') {
+                    appendMessage('You', userMessage, 'user-message');
+                    userInput.value = '';
+                    fetch('/send_message', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ message: userMessage })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        appendMessage('Bot', data.response, 'bot-message');
+                    });
+                }
+            });
+
+            function appendMessage(role, message, messageClass) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', messageClass);
+                const roleElement = document.createElement('p');
+                roleElement.classList.add('role');
+                roleElement.innerText = role;
+                const messageText = document.createElement('p');
+                messageText.innerText = message;
+                messageElement.appendChild(roleElement);
+                messageElement.appendChild(messageText);
+                chatBody.appendChild(messageElement);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
